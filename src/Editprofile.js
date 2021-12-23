@@ -56,7 +56,7 @@ const [persdetails,setPersonaldetails] = React.useState({mobNo:'',DOB:'',adress:
          </div>
         </div>
         </div>
-         <div className="other-user-information">
+         <div className="other-use-information">
            <h1>Personal Details</h1>
           <form>
           <div className="form-group">
