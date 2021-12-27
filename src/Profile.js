@@ -39,7 +39,7 @@ function Profile(props) {
   const handleImageUpload = async (e) => {
     const [file] = e.target.files;
     if (file) {
-      const uploadTask = ref(storagee,'file');
+      const uploadTask = ref(storagee,`${props.currentuser?.uid}`);
       const storageRef = uploadBytesResumable(uploadTask, file)
       storageRef.on("state_changed",(snapshot) => {
         const prog = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) *100)
