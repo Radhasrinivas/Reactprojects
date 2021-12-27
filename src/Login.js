@@ -1,18 +1,23 @@
 import React from 'react';
 import Profile from './Profile';
 import './Login.css';
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "firebase/auth";
 import { auth } from './firebase-config';
 import { Link } from "react-router-dom";
-
 
 function LogIn() {
     const[login,setLogin] = React.useState(false)
     const[userlogin,setUserlogin] = React.useState({email:'',password:''})
+    const[currentuser, setcurrentuser] = React.useState()
+    
+      onAuthStateChanged(auth, (user) => {
+      console.log('user1',user)
+      setcurrentuser(user)
+    })
 
     if(login){
-        console.log('logged in',login)
-        return <Profile userr={userlogin.email}/>
+        console.log('currentuser',currentuser)
+        return <Profile currentuser={currentuser} />
     }
      
     const inputHandleer=(e)=>{
@@ -36,7 +41,7 @@ function LogIn() {
       const restPassword = async (e) => {
         e.preventDefault()
         try{
-            const userAuthh = await sendPasswordResetEmail(auth,userlogin.email)
+            const resetPass = await sendPasswordResetEmail(auth,userlogin.email)
             alert("Reset password mail has been sent to your email");
              }catch (error){
               alert(error.message)

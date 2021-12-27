@@ -2,29 +2,40 @@ import React from 'react';
 import './Editprofile.css';
 import Profile from './Profile';
 import { FaUserAlt } from 'react-icons/fa';
+import { onAuthStateChanged } from "firebase/auth";
+import { auth,db } from './firebase-config';
+import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore/lite";
+
+
 function Editprofile(props) {
 const uploadedImage = React.useRef(null);
 const imageUploader = React.useRef(null);
 const [save,setSave] = React.useState(false);
 const [persdetails,setPersonaldetails] = React.useState({mobNo:'',DOB:'',adress:''})
+const[currentuser, setcurrentuser] = React.useState()
+    
+      onAuthStateChanged(auth, (user) => {
+      console.log('user1',user)
+      setcurrentuser(user)
+    })
+    const updateDataOfUser = async (e)=>{
+      e.preventDefault()
+      try{
+    await updateDoc(doc(db, "users", currentuser.uid),{
+      phonenumber: persdetails.mobNo,
+      Dateofbirth: persdetails.DOB,
+      adress: persdetails.adress
+       })
+       setSave(true)
+      }catch(error){
+        console.log(error)
+      }
+      }
 
    if(save){
-       return <Profile persdetailsmobNo={persdetails.mobNo} persdetailsDOB={persdetails.DOB} persdetailsadress={persdetails.adress}/>
+       return <Profile currentuser={currentuser} />
    }
-
- const handleImageUpload = e => {
-    const [file] = e.target.files;
-     if (file) {
-       const reader = new FileReader();
-       const { current } = uploadedImage;
-       current.file = file;
-       reader.onload = e => {
-         current.src = e.target.result;
-       };
-       reader.readAsDataURL(file);
-     }
-   };
-   
+ 
   const inputHandlerr=(e)=>{
      e.preventDefault()
      const{name,value}=e.target
@@ -35,19 +46,6 @@ const [persdetails,setPersonaldetails] = React.useState({mobNo:'',DOB:'',adress:
 
   return (
      <div className="profile-info">
-     {/* <div style={{display: "flex",flexDirection: "column",justifyContent: "center"}}>
-       <input type="file" accept="image/*" onChange={handleImageUpload} ref={imageUploader}
-         style={{display: "none"}}/>
-       <div style={{height: "150px",width: "150px",border: "1px solid black"}}
-         onClick={() => imageUploader.current.click()}>
-         <FaUserAlt />
-         <img ref={uploadedImage}
-           style={{width: "150",
-                  height: "150px",
-                   }}/>
-       </div>
-       Click to upload Image
-     </div> */}
      <div className="editprofile">
      <div className="card" style={{width: "18rem"}}>
          <div className="card-body">
@@ -69,21 +67,12 @@ const [persdetails,setPersonaldetails] = React.useState({mobNo:'',DOB:'',adress:
           </div>
           <div className="form-group">
           <label>Adress</label>
-          <textarea className="form-control" type="text" name="adress" maxlength="50" onChange={inputHandlerr}></textarea>
+          <textarea className="form-control" type="text" name="adress" maxLength="50" onChange={inputHandlerr}></textarea>
           </div>
           <div className="form-group">
-          <button className="btn btn-success" type="text"  onClick={()=>setSave(true)}>Save</button>
+          <button className="btn btn-success" type="text"  onClick={updateDataOfUser}>Save</button>
           </div>
           </form>
-          
-          {/* <label>Gender</label>
-          <p>07-07-1998</p>
-          <label>Mobile Number</label>
-          <p>9886447243</p>
-          <label>Mobile Number</label>
-          <p>9886447243</p>
-          <label>City</label>
-          <p>Raichur</p> */}
          </div>
      </div>
   );

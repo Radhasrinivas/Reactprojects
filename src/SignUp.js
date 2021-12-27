@@ -2,15 +2,22 @@ import React from 'react';
 import './SignUp.css';
 import { Link } from "react-router-dom";
 import Profile from './Profile';
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from './firebase-config';
+import { createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import {auth, db } from './firebase-config';
+import { doc, setDoc, getDoc } from "firebase/firestore/lite";
 
 function SignUp() {
     const[user,setUser] = React.useState({fName:'',lName:'',email:'',password:''})
     const[submit,setSubmit] = React.useState(false)
+    const[currentuser, setcurrentuser] = React.useState()
+    
+      onAuthStateChanged(auth, (user) => {
+      console.log('user1',user)
+      setcurrentuser(user)
+    })
 
     if(submit){
-      return <Profile user={user}/>
+      return <Profile currentuser={currentuser}/>
     }
 const inputHandler=(e)=>{
   e.preventDefault()
@@ -21,13 +28,18 @@ const inputHandler=(e)=>{
   const register = async (e)=>{
     e.preventDefault()
     console.log("entered register")
-     try{
-    const userAuth = await createUserWithEmailAndPassword(auth,user.email,user.password)
-    console.log('users here',userAuth)
-    setSubmit(true)
-     }catch (error){
-       alert(error.message)
-     }
+  try{
+  const currentUser = await createUserWithEmailAndPassword(auth,user.email,user.password);
+  console.log('user registered')
+  await setDoc(doc(db, "users", currentUser.user.uid),{
+      fname: user.fName,
+      lname: user.lName,
+      email: user.email,
+       })
+       setSubmit(true)
+}catch(error){
+    alert(error);
+}
   }
     return (
         <div className="content">
